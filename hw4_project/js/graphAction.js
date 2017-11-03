@@ -10,8 +10,8 @@ var margin = {
   left: 300,
   right: 40
 };
-var width = 1000 - margin.left - margin.right;
-var height = 1900 - margin.top - margin.bottom;
+var width = 2000- margin.left - margin.right;
+var height = 2000 - margin.top - margin.bottom;
 
 function initPage(data) {
   selectedOption = d3.select("select").property('value');
@@ -26,8 +26,9 @@ function initPage(data) {
 
   d3.select("input[value=\"default\"]").on("click", verticalDefaultLayout);
   d3.select("input[value=\"byValue\"]").on("click", verticalByValueLayout);
+  d3.select("input[value=\"gdp_population\"]").on("click", populationGDPValueLayout);
+  d3.select("input[value=\"longitude_latitude\"]").on("click", longitudeLatitudeValueLayout);
   d3.select("select").on("change", changeOption);
-
 }
 
 function initGraph(data) {
@@ -43,7 +44,9 @@ function initGraph(data) {
       country: data[k].name,
       population: data[k].population,
       gdp: data[k].gdp,
-      life_expectancy: data[k].life_expectancy
+      life_expectancy: data[k].life_expectancy,
+      latitude: data[k].latitude,
+      longitude: data[k].longitude
     };
   });
 
@@ -66,17 +69,21 @@ function initGraph(data) {
   node.append("circle")
     .attr("r", 5);
 
-    var scaleVal = d3.select('input[name="scaleRadio"]:checked').property("value");
-    if (scaleVal == "default") {
-      verticalDefaultLayout();
-    } else {
-      verticalByValueLayout();
-    }
-    graph_update(2000);
+  var scaleVal = d3.select('input[name="scaleRadio"]:checked').property("value");
+  if (scaleVal == "default") {
+    verticalDefaultLayout();
+  } else if (scaleVal == "gdp_population") {
+    populationGDPValueLayout();
+  } else if (scaleVal == "longitude_latitude") {
+    longitudeLatitudeValueLayout()
+  } else {
+    verticalByValueLayout();
+  }
+  graph_update(2000);
 }
 
 function verticalDefaultLayout() {
-  var maxVal = getMaxValue(data, selectedOption);
+  var maxVal = (getMaxAndMinValue(data, selectedOption))[1];
   var step = (height - 50) / data.length;
   graph.nodes.forEach(function(d, i) {
     d.x = width / 2;
@@ -86,10 +93,31 @@ function verticalDefaultLayout() {
 }
 
 function verticalByValueLayout() {
-  var maxVal = getMaxValue(data, selectedOption);
+  var minAndMaxVal = getMaxAndMinValue(data, selectedOption);
+  var maxVal = minAndMaxVal[1];
   graph.nodes.forEach(function(d, i) {
     d.x = width / 2;
     d.y = 50 + (1 - d[selectedOption] / maxVal) * (height - 50);
+  });
+  graph_update(2000);
+}
+
+function populationGDPValueLayout() {
+  var maxGDP = (getMaxAndMinValue(data, "gdp"))[1];
+  var maxPopulation = (getMaxAndMinValue(data, "population"))[1];
+  graph.nodes.forEach(function(d, i) {
+    d.x = 50 + (d["gdp"] / maxGDP) * (width - 50);
+    d.y = 50 + (1 - d["population"] / maxPopulation) * (height - 50);
+  });
+  graph_update(2000);
+}
+
+function longitudeLatitudeValueLayout() {
+  var minAndMaxLong = getMaxAndMinValue(data, "longitude");
+  var minAndMaxLat = getMaxAndMinValue(data, "latitude");
+  graph.nodes.forEach(function(d, i) {
+    d.x = 50 + ((-minAndMaxLong[0] + d["longitude"]) / (minAndMaxLong[1] - minAndMaxLong[0])) * (width - 200);
+    d.y = 50 + ((-minAndMaxLong[0] + d["latitude"]) / (minAndMaxLong[1] - minAndMaxLong[0])) * (height - 50);
   });
   graph_update(2000);
 }
@@ -107,15 +135,20 @@ function changeOption() {
   initGraph(data);
 }
 
-function getMaxValue(data, key) {
-  var max = 0;
+function getMaxAndMinValue(data, key) {
+  var max = 0,
+    min = 0;
   for (var i = 0; i < data.length; i++) {
     if (data[i][key] > max) {
       max = data[i][key];
     }
+    if (data[i][key] < min) {
+      min = data[i][key];
+    }
   }
-  return max;
+  return [min, max];
 }
+
 
 function sortData(data, sortByParam, reverse) {
   switch (sortByParam) {
@@ -130,6 +163,12 @@ function sortData(data, sortByParam, reverse) {
       break;
     case "life_expectancy":
       data.sort(sortByKey("life_expectancy", reverse));
+      break;
+    case "longitude":
+      data.sort(sortByKey("longitude", reverse));
+      break;
+    case "latitude":
+      data.sort(sortByKey("latitude", reverse));
       break;
   }
   return data;

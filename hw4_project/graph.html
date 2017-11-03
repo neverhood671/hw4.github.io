@@ -20,6 +20,8 @@
   <label> Scale:
     <label> <input type = "radio" name = "scaleRadio" value = "default" checked></input> Default </label>
     <label> <input type = "radio" name = "scaleRadio" value = "byValue"></input> By Value </label>
+    <label> <input type = "radio" name = "scaleRadio" value = "gdp_population"></input> By gdp and population </label>
+    <label> <input type = "radio" name = "scaleRadio" value = "longitude_latitude"></input> By  longitude and latitude </label>
   <br>
   <script>
     d3.json("data/countries_2012.json", function(allData) {
