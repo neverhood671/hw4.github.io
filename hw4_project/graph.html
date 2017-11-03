@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+
+<head>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <link rel="stylesheet" href="../styles/graph.css" />
+  <script src="../js/graphAction.js"></script>
+</head>
+
+<body>
+  <label> Sort by:
+  <select>
+    <option value="gdp">GDP</option>
+    <option value="population" selected>Population</option>
+    <option value="life_expectancy">Life Expectancy</option>
+  </select>
+  </label>
+  <br>
+  <label> Scale:
+    <label> <input type = "radio" name = "scaleRadio" value = "Dafault" checked></input> Dafault </label>
+  <label> <input type = "radio" name = "scaleRadio" value = "ByValue"></input> ByValue </label>
+  <br>
+  <script>
+    d3.json("/server/countries_2012.json", function(data) {
+      initBarPage(data);
+    });
+  </script>
+</body>
+
+</html>
