@@ -4,8 +4,8 @@
 
 <head>
   <script src="https://d3js.org/d3.v3.min.js"></script>
-  <link rel="stylesheet" href="../styles/graph.css" />
-  <script src="../js/graphAction.js"></script>
+  <link rel="stylesheet" href="/styles/graph.css" />
+  <script src="/js/graphAction.js"></script>
 </head>
 
 <body>
@@ -18,12 +18,13 @@
   </label>
   <br>
   <label> Scale:
-    <label> <input type = "radio" name = "scaleRadio" value = "Dafault" checked></input> Dafault </label>
-  <label> <input type = "radio" name = "scaleRadio" value = "ByValue"></input> ByValue </label>
+    <label> <input type = "radio" name = "scaleRadio" value = "default" checked></input> Default </label>
+    <label> <input type = "radio" name = "scaleRadio" value = "byValue"></input> By Value </label>
   <br>
   <script>
-    d3.json("/server/countries_2012.json", function(data) {
-      initBarPage(data);
+    d3.json("data/countries_2012.json", function(allData) {
+      data = allData;
+      initPage(data);
     });
   </script>
 </body>
