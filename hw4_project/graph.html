@@ -5,30 +5,71 @@
 <head>
   <script src="https://d3js.org/d3.v3.min.js"></script>
   <link rel="stylesheet" href="/styles/graph.css" />
-  <script src="/js/graphAction.js"></script>
+  <script src="/js/graph.js" async></script>
+  <script src="/js/mainAction.js" async></script>
 </head>
 
 <body>
-  <label> Sort by:
-  <select>
-    <option value="gdp">GDP</option>
-    <option value="population" selected>Population</option>
-    <option value="life_expectancy">Life Expectancy</option>
-  </select>
-  </label>
+
+  <div id = "layautBlock">
+
+    <label> Layaut:
+      <label> <input type = "radio" name = "layautRadio" value = "line" checked></input> Line </label>
+      <label> <input type = "radio" name = "layautRadio" value = "2D"></input> Two axis </label>
+      <label> <input type = "radio" name = "layautRadio" value = "circle"></input> Circle </label>
+      <label> <input type = "radio" name = "layautRadio" value = "ring"></input> Ring </label>
+    </label>
+
+  </div>
+
+  <div id = "lineBlock" class = "optionBlock">
+
+    <label> Sort by:
+      <select id="valueTypeSelect">
+        <option value="gdp">GDP</option>
+        <option value="population" selected>Population</option>
+        <option value="life_expectancy">Life Expectancy</option>
+      </select>
+    </label>
+
+    <br>
+    <label> Scale:
+      <label> <input type = "radio" name = "scaleRadio" value = "default" checked></input> Default </label>
+      <label> <input type = "radio" name = "scaleRadio" value = "byValue"></input> By Value </label>
+    </label>
+
+  </div>
+
+  <div id = "twoDBlock"  class = "optionBlock">
+    <label> Axis:
+      <label> <input type = "radio" name = "axisRadio" value = "gdp_population" checked></input> GDP and Population </label>
+      <label> <input type = "radio" name = "axisRadio" value = "longitude_latitude"></input> Longitude and Latitude </label>
+    </label>
+  </div>
+
+  <div id = "circleBlock" class = "optionBlock">
+    <label> Separation Type:
+      <label> <input type = "radio" name = "circleRadio" value = "horizonral" checked></input> Horizonral </label>
+      <label> <input type = "radio" name = "circleRadio" value = "pie"></input> Pie </label>
+    </label>
+    <br>
+    <label> Separate by Continents
+       <input type = "checkbox" onchange="separateNodes()"/>
+    </label>
+  </div>
+
+
+  <div id = "ringBlock" class = "optionBlock">
+    <label> Separate by Continents
+       <input type = "checkbox" onchange="separateNodes()"/>
+    </label>
+  </div>
+
   <br>
-  <label> Scale:
-    <label> <input type = "radio" name = "scaleRadio" value = "default" checked></input> Default </label>
-    <label> <input type = "radio" name = "scaleRadio" value = "byValue"></input> By Value </label>
-    <label> <input type = "radio" name = "scaleRadio" value = "gdp_population"></input> By gdp and population </label>
-    <label> <input type = "radio" name = "scaleRadio" value = "longitude_latitude"></input> By  longitude and latitude </label>
-  <br>
-  <script>
-    d3.json("data/countries_2012.json", function(allData) {
-      data = allData;
-      initPage(data);
-    });
-  </script>
+
+  <svg id="graphArea" width="2000" height="4000">
+           <g id="graph"></g>
+  </svg>
 </body>
 
 </html>
