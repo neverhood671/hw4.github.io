@@ -1,5 +1,53 @@
 var data;
 var selectedYear = 2012;
+var width = 2000;
+var height = 2000;
+
+var foci = {
+  "Africa": {
+    x_horizontal: width * 0,
+    y_horizontal: height / 4,
+    x_pie: width * 0.15,
+    y_pie: height / 4,
+    color: "yellow"
+  },
+  "Americas": {
+    x_horizontal: width * 0.2,
+    y_horizontal: height / 4,
+    x_pie: width * 0.25,
+    y_pie: height / 8,
+    color: "brown"
+  },
+  "Europe": {
+    x_horizontal: width * 0.4,
+    y_horizontal: height / 4,
+    x_pie: width * 0.4,
+    y_pie: height / 8,
+    color: "red"
+  },
+  "Asia": {
+    x_horizontal: width * 0.6,
+    y_horizontal: height / 4,
+    x_pie: width * 0.5,
+    y_pie: height / 4,
+    color: "blue"
+  },
+  "Oceania": {
+    x_horizontal: width * 0.8,
+    y_horizontal: height / 4,
+    x_pie: width * 0.3,
+    y_pie: height / 3,
+    color: "green"
+  }
+};
+
+var force = d3.layout.force()
+  .size([width, height])
+  .charge(-50)
+  .linkDistance(height / 4)
+  .on("tick", tick)
+  .on("start", function(d) {})
+  .on("end", function(d) {});
 
 d3.json("data/countries_1995_2012.json", function(allData) {
   data = allData;
@@ -34,6 +82,7 @@ function initNodes(actualData) {
     return {
       id: actualData[k].country_id,
       country: actualData[k].name,
+      continent: actualData[k].continent,
       latitude: actualData[k].latitude,
       longitude: actualData[k].longitude,
       population: currentYears[j].population,
@@ -65,6 +114,8 @@ function initLinks(nodes) {
 }
 
 function lineLayout() {
+  force.stop();
+
   var scale = d3.select('input[name="scaleRadio"]:checked').property("value");
   var sortBy = d3.select("select").property('value');
 
@@ -98,6 +149,8 @@ function byValueScale() {
 }
 
 function twoDemisionLayout() {
+  force.stop();
+
   var axis = d3.select('input[name="axisRadio"]:checked').property("value");
   if (axis == "gdp_population") {
     populationGDPAxis();
@@ -126,12 +179,89 @@ function longitudeLatitudeAxis() {
   graph_update(2000);
 }
 
-function circleLayout() {
+function tick(d) {
+  var k = .1;
 
+  var sepration = d3.select('input[name="circleSeparation"]').property("checked");
+  var separationType = d3.select('input[name="circleRadio"]:checked').property("value");
+
+  if (sepration && separationType == "horizonral") {
+    graph.nodes.forEach(function(o, i) {
+      o.y += (foci[o.continent].y_horizontal - o.y) * k;
+      o.x += (foci[o.continent].x_horizontal - o.x) * k;
+    });
+  } else if (sepration && separationType == "pie") {
+    graph.nodes.forEach(function(o, i) {
+      o.y += (foci[o.continent].y_pie - o.y) * k;
+      o.x += (foci[o.continent].x_pie - o.x) * k;
+    });
+  } else {
+    graph.nodes.forEach(function(o, i) {
+      o.y += (width / 4 - o.y) * k;
+      o.x += (height / 4 - o.x) * k;
+    });
+  }
+
+  graph_update(20);
+}
+
+function circleLayout() {
+  force.nodes(graph.nodes)
+    .links(graph.links)
+    .start();
+  graph_update(2000);
 }
 
 
-function ringeLayout() {
+
+function ringLayout() {
+  force.stop();
+  var sepration = d3.select('input[name="ringSeparation"]').property("checked");
+  var sortBy = d3.select('input[name="ringSortRadio"]:checked').property("value");
+
+  var pie = d3.layout.pie()
+    .sort(function(a, b) {
+      return a[sortBy] - b[sortBy];
+    }) // Sorting by categories
+    .value(function(d, i) {
+      return 1; // We want an equal pie share/slice for each point
+    });
+
+
+  if (!sepration){
+    var arc = d3.svg.arc()
+      .outerRadius(Math.min(height, width) / 2);
+
+    graph.nodes = pie(graph.nodes).map(function(d, i) {
+      // Needed to caclulate the centroid
+      d.innerRadius = 0;
+      d.outerRadius = Math.min(height, width) / 2;
+
+      // Building the data object we are going to return
+      d.data.x = arc.centroid(d)[0] + width / 2;
+      d.data.y = arc.centroid(d)[1] + height / 2;
+
+      return d.data;
+    });
+  } else {
+
+    var multArc = d3.svg.arc()
+      .outerRadius(Math.min(height, width) / 10);
+
+    graph.nodes = pie(graph.nodes).map(function(d, i) {
+      // Needed to caclulate the centroid
+      d.innerRadius = 0;
+      d.outerRadius =  Math.min(height, width) / 10;
+
+      // Building the data object we are going to return
+      d.data.x = multArc.centroid(d)[0] + foci[d.data.continent].x_pie;
+      d.data.y = multArc.centroid(d)[1] + foci[d.data.continent].y_pie;;
+
+      return d.data;
+    });
+  }
+
+  graph_update(2000);
 
 }
 

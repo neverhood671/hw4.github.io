@@ -1,5 +1,4 @@
-var width = 2000;
-var height = 2000;
+
 
 class Graph {
 
@@ -42,7 +41,10 @@ class Graph {
 
     node.append("circle")
       .attr("r", 8)
-      .attr("class", "node_circle");
+      .attr("class", "node_circle")
+      .attr("style", function(d){
+        return "fill: " + foci[d.continent].color;
+      });
 
 
     this.applyLayaut();
@@ -66,7 +68,7 @@ class Graph {
         break;
       case "ring":
         d3.select("#ringBlock").attr("style", "display: block");
-        ringeLayout();
+        ringLayout();
         break;
     }
   }

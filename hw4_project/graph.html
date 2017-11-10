@@ -54,14 +54,20 @@
     </label>
     <br>
     <label> Separate by Continents
-       <input type = "checkbox" onchange="separateNodes()"/>
+       <input type = "checkbox" name="circleSeparation" onchange="updateGraph()"/>
     </label>
   </div>
 
 
   <div id = "ringBlock" class = "optionBlock">
+    <label> Sort By:
+      <label> <input type = "radio" name = "ringSortRadio" value = "population" ></input> Population </label>
+      <label> <input type = "radio" name = "ringSortRadio" value = "gdp"></input> GDP </label>
+      <label> <input type = "radio" name = "ringSortRadio" value = "none" checked></input> None </label>
+    </label>
+    <br>
     <label> Separate by Continents
-       <input type = "checkbox" onchange="separateNodes()"/>
+       <input type = "checkbox"  name="ringSeparation" onchange="updateGraph()"/>
     </label>
   </div>
 
