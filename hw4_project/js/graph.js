@@ -22,6 +22,12 @@ class Graph {
       .attr("height", height)
       .attr("transform", "translate(0,70)");
 
+    svg.selectAll(".link")
+      .data(graph.links)
+      .enter()
+      .append("line")
+      .attr("class", "link");
+
     var node = svg.selectAll(".node")
       .data(self.nodes)
       .enter()
@@ -37,15 +43,10 @@ class Graph {
       .attr("dx", 12)
       .attr("dy", 5);
 
-    svg.selectAll(".link")
-      .data(graph.links)
-      .enter()
-      .append("line")
-      .attr("class", "link");
-
     node.append("circle")
-      .attr("r", 8)
+      .attr("r", 6)
       .attr("class", "node_circle")
+
     /*.attr("style", function(d) {
       return "fill: " + foci[d.continent].color;
     })*/
@@ -64,6 +65,9 @@ class Graph {
               return false;
             }
           })
+          .classed("link_others", function(l) {
+            return !(l.source === d);
+          });
 
         d3.selectAll(".node")
           .classed("node_target", function(n) {
@@ -72,21 +76,23 @@ class Graph {
           .classed("node_source", function(n) {
             return n.source;
           })
-          .classed("node_others", function(n){
-            return !(d.source || d.target);
-          });
-
-        d3.selectAll(".node").select(".node_circle")
-          .classed("node_circle_source", function(d) {
-            return d.source;
+          .classed("node_others", function(n) {
+            return !(n.source || n.target);
           })
-          .classed("node_circle_others", function(d){
-            return !(d.source || d.target);
+
+        d3.selectAll(".node_circle")
+          .classed("node_circle_source", function(n) {
+            return n.source;
+          })
+          .classed("node_circle_others", function(n) {
+            return !(n.source || n.target);
           });
 
       }).on("mouseout", function() {
+
         d3.selectAll(".link")
-          .classed("link_source", false);
+          .classed("link_source", false)
+          .classed("link_others", false);
 
         d3.selectAll(".node")
           .classed("node_target", false)
@@ -96,9 +102,9 @@ class Graph {
             d.target = false;
             d.source = false;
           });
-          d3.selectAll(".node_circle")
-            .classed("node_circle_source", false)
-            .classed("node_circle_others", false);
+        d3.selectAll(".node_circle")
+          .classed("node_circle_source", false)
+          .classed("node_circle_others", false);
       });
     this.applyLayaut();
   }

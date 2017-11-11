@@ -1,7 +1,7 @@
 var data;
 var selectedYear = 2012;
-var width = 2000;
-var height = 2000;
+var width = 1000;
+var height = 1700;
 
 var foci = {
   "Africa": {
@@ -115,10 +115,7 @@ function initLinks(nodes) {
 
 function lineLayout() {
   force.stop();
-
   var scale = d3.select('input[name="scaleRadio"]:checked').property("value");
-  var sortBy = d3.select("select").property('value');
-
   if (scale == "default") {
     defaultScale();
   } else {
@@ -127,12 +124,12 @@ function lineLayout() {
 }
 
 function defaultScale() {
-  var selectedOption = d3.select("select").property('value');
-  var maxVal = (getMaxAndMinValue(data, selectedOption))[1];
-  var step = (height - 50) / data.length;
+  var sortBy = d3.select("select").property('value');
+  sortData(graph.nodes, sortBy, 1);
+  var step = height / data.length ;
   graph.nodes.forEach(function(d, i) {
     d.x = width / 2;
-    d.y = 50 + step * i;
+    d.y = step * i;
   });
   graphUpdate(2000);
 }
@@ -141,9 +138,10 @@ function byValueScale() {
   var selectedOption = d3.select("select").property('value');
   var minAndMaxVal = getMaxAndMinValue(graph.nodes, selectedOption);
   var maxVal = minAndMaxVal[1];
+  var minVal =  minAndMaxVal[0]
   graph.nodes.forEach(function(d, i) {
     d.x = width / 2;
-    d.y = 50 + (1 - d[selectedOption] / maxVal) * (height - 50);
+    d.y = (1 - d[selectedOption] / maxVal) * height;
   });
   graphUpdate(2000);
 }
@@ -212,8 +210,6 @@ function circleLayout() {
   graphUpdate(2000);
 }
 
-
-
 function ringLayout() {
   force.stop();
   var sepration = d3.select('input[name="ringSeparation"]').property("checked");
@@ -235,11 +231,11 @@ function ringLayout() {
     graph.nodes = pie(graph.nodes).map(function(d, i) {
       // Needed to caclulate the centroid
       d.innerRadius = 0;
-      d.outerRadius = Math.min(height, width) / 2;
+      d.outerRadius = Math.min(height, width) / 3;
 
       // Building the data object we are going to return
-      d.data.x = arc.centroid(d)[0] + width / 2;
-      d.data.y = arc.centroid(d)[1] + height / 2;
+      d.data.x = arc.centroid(d)[0] + width / 3;
+      d.data.y = arc.centroid(d)[1] + height / 4;
 
       return d.data;
     });
@@ -248,21 +244,32 @@ function ringLayout() {
     var multArc = d3.svg.arc()
       .outerRadius(Math.min(height, width) / 10);
 
-    graph.nodes = pie(graph.nodes).map(function(d, i) {
-      // Needed to caclulate the centroid
-      d.innerRadius = 0;
-      d.outerRadius =  Math.min(height, width) / 10;
+    var continentNodes = {
+      Africa: [],
+      Asia: [],
+      Oceania: [],
+      Americas: [],
+      Europe: []
+    }
 
-      // Building the data object we are going to return
-      d.data.x = multArc.centroid(d)[0] + foci[d.data.continent].x_pie;
-      d.data.y = multArc.centroid(d)[1] + foci[d.data.continent].y_pie;;
+    for(var j = 0; j < graph.nodes.length; j++){
+      continentNodes[graph.nodes[j].continent].push(graph.nodes[j]);
+    }
 
-      return d.data;
-    });
+    var keys = Object.keys(continentNodes);
+
+    for (var k =0; k < keys.length; k++){
+    pie(continentNodes[keys[k]]).map(function(d, i) {
+        d.innerRadius = 0;
+        d.outerRadius =  Math.min(height, width) / 10;
+        d.data.x = multArc.centroid(d)[0] + foci[keys[k]].x_pie;
+        d.data.y = multArc.centroid(d)[1] + foci[keys[k]].y_pie;;
+        return d.data;
+      });
+    }
   }
 
   graphUpdate(2000);
-
 }
 
 function graphUpdate(duration) {
