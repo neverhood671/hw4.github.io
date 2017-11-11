@@ -49,12 +49,11 @@ var continentNodes = {
   Europe: []
 }
 
-
 var force = d3.layout.force()
   .size([width, height])
-  .charge(-80)
-  .gravity(0)
-  .linkDistance(300)
+  .charge(-5000)
+  .gravity(.5)
+  .linkStrength(0)
   .on("tick", tick)
   .on("start", function(d) {})
   .on("end", function(d) {});
@@ -189,7 +188,8 @@ function longitudeLatitudeAxis() {
 }
 
 function tick(d) {
-  var k = 0.7;
+
+  var k = 6 * d.alpha;
 
   var sepration = d3.select('input[name="circleSeparation"]').property("checked");
   var separationType = d3.select('input[name="circleRadio"]:checked').property("value");
@@ -210,15 +210,15 @@ function tick(d) {
       o.x += (height / 4 - o.x) * k;
     });
   }
+  graphUpdate(500);
 
-  graphUpdate(0);
 }
 
 function circleLayout() {
   force.nodes(graph.nodes)
     .links(graph.links)
     .start();
-  graphUpdate(2000);
+  graphUpdate(500);
 }
 
 function ringLayout() {
@@ -229,7 +229,7 @@ function ringLayout() {
   var pie = d3.layout.pie()
     .sort(function(a, b) {
       return a[sortBy] - b[sortBy];
-    }) // Sorting by categories
+    })
     .value(function(d, i) {
       return 1; // We want an equal pie share/slice for each point
     });
@@ -266,12 +266,12 @@ function ringLayout() {
 }
 
 function graphUpdate(duration) {
-  d3.selectAll(".node").transition().duration(duration)
+  d3.selectAll(".node").transition() 
     .attr("transform", function(d) {
       return "translate(" + d.x + "," + d.y + ")";
     });
 
-  d3.selectAll(".link").transition().duration(duration)
+  d3.selectAll(".link").transition()
     .attr("x1", function(d) {
       return d.target.x;
     })
