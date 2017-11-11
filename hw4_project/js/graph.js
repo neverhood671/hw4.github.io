@@ -47,10 +47,9 @@ class Graph {
       .attr("r", 6)
       .attr("class", "node_circle")
 
-    .attr("style", function(d) {
-      return "fill: " + foci[d.continent].color;
-    })
-    ;
+    /*  .attr("style", function(d) {
+        return "fill: " + foci[d.continent].color;
+      })*/;
 
     svg.selectAll(".node")
       .on("mouseover", function(d, i) {
