@@ -1,6 +1,36 @@
 .node_circle {
-  /*fill: white;*/
+  fill: white;
   opacity: .8;
   stroke: #252525;
   stroke-width: 1px;
+}
+
+.node_circle_source {
+    fill: black;
+}
+
+.node_circle_others,
+.node_others  {
+    opacity: 0.1;
+}
+
+.link {
+  stroke: #DCDCDC;
+  stroke-width: .8px;
+}
+
+.node {
+  font: 300 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.node_source,
+.node_target {
+  fill: black;
+  font-weight: 700;
+}
+
+.link_source {
+  stroke-opacity: 1;
+  stroke-width: 2px;
+  stroke: black;
 }

@@ -1,5 +1,3 @@
-
-
 class Graph {
 
 
@@ -32,21 +30,76 @@ class Graph {
 
     svg.selectAll(".node")
       .append("text")
-      .text(function(d){
+      .text(function(d) {
         return d.country;
       })
       .attr("class", "country_label")
       .attr("dx", 12)
       .attr("dy", 5);
 
+    svg.selectAll(".link")
+      .data(graph.links)
+      .enter()
+      .append("line")
+      .attr("class", "link");
+
     node.append("circle")
       .attr("r", 8)
       .attr("class", "node_circle")
-      .attr("style", function(d){
-        return "fill: " + foci[d.continent].color;
+    /*.attr("style", function(d) {
+      return "fill: " + foci[d.continent].color;
+    })*/
+    ;
+
+    svg.selectAll(".node")
+      .on("mouseover", function(d, i) {
+
+        d3.selectAll(".link")
+          .classed("link_source", function(l) {
+            if (l.source === d) {
+              l.source.source = true;
+              l.target.target = true;
+              return true;
+            } else {
+              return false;
+            }
+          })
+
+        d3.selectAll(".node")
+          .classed("node_target", function(n) {
+            return n.target;
+          })
+          .classed("node_source", function(n) {
+            return n.source;
+          })
+          .classed("node_others", function(n){
+            return !(d.source || d.target);
+          });
+
+        d3.selectAll(".node").select(".node_circle")
+          .classed("node_circle_source", function(d) {
+            return d.source;
+          })
+          .classed("node_circle_others", function(d){
+            return !(d.source || d.target);
+          });
+
+      }).on("mouseout", function() {
+        d3.selectAll(".link")
+          .classed("link_source", false);
+
+        d3.selectAll(".node")
+          .classed("node_target", false)
+          .classed("node_source", false)
+          .classed("node_others", false)
+          .each(function(d) {
+            d.target = false;
+            d.source = false;
+          });
+          d3.selectAll(".node_circle")
+            .classed("node_circle_source", false)
+            .classed("node_circle_others", false);
       });
-
-
     this.applyLayaut();
   }
 

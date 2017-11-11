@@ -134,7 +134,7 @@ function defaultScale() {
     d.x = width / 2;
     d.y = 50 + step * i;
   });
-  graph_update(2000);
+  graphUpdate(2000);
 }
 
 function byValueScale() {
@@ -145,7 +145,7 @@ function byValueScale() {
     d.x = width / 2;
     d.y = 50 + (1 - d[selectedOption] / maxVal) * (height - 50);
   });
-  graph_update(2000);
+  graphUpdate(2000);
 }
 
 function twoDemisionLayout() {
@@ -166,7 +166,7 @@ function populationGDPAxis() {
     d.x = 50 + (d["gdp"] / maxGDP) * (width - 50);
     d.y = 50 + (1 - d["population"] / maxPopulation) * (height - 50);
   });
-  graph_update(2000);
+  graphUpdate(2000);
 }
 
 function longitudeLatitudeAxis() {
@@ -176,11 +176,11 @@ function longitudeLatitudeAxis() {
     d.x = 50 + ((-minAndMaxLong[0] + d["longitude"]) / (minAndMaxLong[1] - minAndMaxLong[0])) * (width - 200);
     d.y = 50 + ((-minAndMaxLong[0] + d["latitude"]) / (minAndMaxLong[1] - minAndMaxLong[0])) * (height - 50);
   });
-  graph_update(2000);
+  graphUpdate(2000);
 }
 
 function tick(d) {
-  var k = .1;
+  var k = .05;
 
   var sepration = d3.select('input[name="circleSeparation"]').property("checked");
   var separationType = d3.select('input[name="circleRadio"]:checked').property("value");
@@ -202,14 +202,14 @@ function tick(d) {
     });
   }
 
-  graph_update(20);
+  graphUpdate(20);
 }
 
 function circleLayout() {
   force.nodes(graph.nodes)
     .links(graph.links)
     .start();
-  graph_update(2000);
+  graphUpdate(2000);
 }
 
 
@@ -261,15 +261,21 @@ function ringLayout() {
     });
   }
 
-  graph_update(2000);
+  graphUpdate(2000);
 
 }
 
-function graph_update(duration) {
+function graphUpdate(duration) {
   d3.selectAll(".node").transition().duration(duration)
     .attr("transform", function(d) {
       return "translate(" + d.x + "," + d.y + ")";
     });
+
+  d3.selectAll(".link").transition().duration(duration)
+        .attr("x1", function(d) { return d.target.x; })
+        .attr("y1", function(d) { return d.target.y; })
+        .attr("x2", function(d) { return d.source.x; })
+        .attr("y2", function(d) { return d.source.y; });
 }
 
 function chooseData() {
