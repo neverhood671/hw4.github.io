@@ -5,35 +5,35 @@ var height = 1700;
 
 var foci = {
   "Africa": {
-    x_horizontal: width * 0,
+    x_horizontal: width * 0.2,
     y_horizontal: height / 4,
     x_pie: width * 0.15,
     y_pie: height / 4,
     color: "yellow"
   },
   "Americas": {
-    x_horizontal: width * 0.2,
+    x_horizontal: width * 0.4,
     y_horizontal: height / 4,
     x_pie: width * 0.25,
     y_pie: height / 8,
     color: "brown"
   },
   "Europe": {
-    x_horizontal: width * 0.4,
+    x_horizontal: width * 0.6,
     y_horizontal: height / 4,
     x_pie: width * 0.4,
     y_pie: height / 8,
     color: "red"
   },
   "Asia": {
-    x_horizontal: width * 0.6,
+    x_horizontal: width * 0.8,
     y_horizontal: height / 4,
     x_pie: width * 0.5,
     y_pie: height / 4,
     color: "blue"
   },
   "Oceania": {
-    x_horizontal: width * 0.8,
+    x_horizontal: width * 0.95,
     y_horizontal: height / 4,
     x_pie: width * 0.3,
     y_pie: height / 3,
@@ -41,10 +41,20 @@ var foci = {
   }
 };
 
+var continentNodes = {
+  Africa: [],
+  Asia: [],
+  Oceania: [],
+  Americas: [],
+  Europe: []
+}
+
+
 var force = d3.layout.force()
   .size([width, height])
-  .charge(-50)
-  .linkDistance(height / 4)
+  .charge(-80)
+  .gravity(0)
+  .linkDistance(300)
   .on("tick", tick)
   .on("start", function(d) {})
   .on("end", function(d) {});
@@ -55,11 +65,12 @@ d3.json("data/countries_1995_2012.json", function(allData) {
   let nodes = initNodes(data);
   let links = initLinks(nodes);
 
-  // Define this as a global variable
   window.graph = new Graph(nodes, links, data);
-
-  // Draw the Bar chart for the first time
   graph.updateGraph();
+
+  for (var j = 0; j < graph.nodes.length; j++) {
+    continentNodes[graph.nodes[j].continent].push(graph.nodes[j]);
+  }
 });
 
 function updateGraph() {
@@ -126,7 +137,7 @@ function lineLayout() {
 function defaultScale() {
   var sortBy = d3.select("select").property('value');
   sortData(graph.nodes, sortBy, 1);
-  var step = height / data.length ;
+  var step = height / data.length;
   graph.nodes.forEach(function(d, i) {
     d.x = width / 2;
     d.y = step * i;
@@ -138,7 +149,7 @@ function byValueScale() {
   var selectedOption = d3.select("select").property('value');
   var minAndMaxVal = getMaxAndMinValue(graph.nodes, selectedOption);
   var maxVal = minAndMaxVal[1];
-  var minVal =  minAndMaxVal[0]
+  var minVal = minAndMaxVal[0]
   graph.nodes.forEach(function(d, i) {
     d.x = width / 2;
     d.y = (1 - d[selectedOption] / maxVal) * height;
@@ -178,7 +189,7 @@ function longitudeLatitudeAxis() {
 }
 
 function tick(d) {
-  var k = .05;
+  var k = 0.7;
 
   var sepration = d3.select('input[name="circleSeparation"]').property("checked");
   var separationType = d3.select('input[name="circleRadio"]:checked').property("value");
@@ -200,7 +211,7 @@ function tick(d) {
     });
   }
 
-  graphUpdate(20);
+  graphUpdate(0);
 }
 
 function circleLayout() {
@@ -223,20 +234,14 @@ function ringLayout() {
       return 1; // We want an equal pie share/slice for each point
     });
 
-
-  if (!sepration){
+  if (!sepration) {
     var arc = d3.svg.arc()
       .outerRadius(Math.min(height, width) / 2);
-
     graph.nodes = pie(graph.nodes).map(function(d, i) {
-      // Needed to caclulate the centroid
       d.innerRadius = 0;
       d.outerRadius = Math.min(height, width) / 3;
-
-      // Building the data object we are going to return
       d.data.x = arc.centroid(d)[0] + width / 3;
       d.data.y = arc.centroid(d)[1] + height / 4;
-
       return d.data;
     });
   } else {
@@ -244,24 +249,12 @@ function ringLayout() {
     var multArc = d3.svg.arc()
       .outerRadius(Math.min(height, width) / 10);
 
-    var continentNodes = {
-      Africa: [],
-      Asia: [],
-      Oceania: [],
-      Americas: [],
-      Europe: []
-    }
-
-    for(var j = 0; j < graph.nodes.length; j++){
-      continentNodes[graph.nodes[j].continent].push(graph.nodes[j]);
-    }
-
     var keys = Object.keys(continentNodes);
 
-    for (var k =0; k < keys.length; k++){
-    pie(continentNodes[keys[k]]).map(function(d, i) {
+    for (var k = 0; k < keys.length; k++) {
+      pie(continentNodes[keys[k]]).map(function(d, i) {
         d.innerRadius = 0;
-        d.outerRadius =  Math.min(height, width) / 10;
+        d.outerRadius = Math.min(height, width) / 10;
         d.data.x = multArc.centroid(d)[0] + foci[keys[k]].x_pie;
         d.data.y = multArc.centroid(d)[1] + foci[keys[k]].y_pie;;
         return d.data;
@@ -279,10 +272,18 @@ function graphUpdate(duration) {
     });
 
   d3.selectAll(".link").transition().duration(duration)
-        .attr("x1", function(d) { return d.target.x; })
-        .attr("y1", function(d) { return d.target.y; })
-        .attr("x2", function(d) { return d.source.x; })
-        .attr("y2", function(d) { return d.source.y; });
+    .attr("x1", function(d) {
+      return d.target.x;
+    })
+    .attr("y1", function(d) {
+      return d.target.y;
+    })
+    .attr("x2", function(d) {
+      return d.source.x;
+    })
+    .attr("y2", function(d) {
+      return d.source.y;
+    });
 }
 
 function chooseData() {
