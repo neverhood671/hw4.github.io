@@ -88,7 +88,7 @@ class TileChart {
                 .attr("transform", "translate(0,50)");
 
             let legendQuantile = d3.legendColor()
-                .shapeWidth(100)
+                .shapeWidth(70)
                 .cells(10)
                 .orient('horizontal')
                 .scale(colorScale);
@@ -136,7 +136,7 @@ class TileChart {
             //Call the tool tip on hover over the tiles to display stateName, count of electoral votes
             //then, vote percentage and number of votes won by each party.
             //HINT: Use the .republican, .democrat and .independent classes to style your elements.
-    
+
     };
 
 

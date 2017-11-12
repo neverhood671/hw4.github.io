@@ -59,8 +59,6 @@ class YearChart {
    */
   update() {
 
-
-
     //Domain definition for global color scale
     let domain = [-60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60];
 
@@ -80,24 +78,27 @@ class YearChart {
 
     var svg = d3.select("#year-chart").select("svg")
       .append("g")
-      .attr("class", "year_axis")
+      .attr("class", "lineChart")
       .attr("transform", "translate(0, 50)")
       .call(d3.axisBottom(xScale).ticks(self.electionWinners.length)
         .tickFormat(function(time) {
           return time;
         })
       );
+    svg.select("path")
+      .append("line")
+      .attr("class", "lineChart");
 
     svg.selectAll("g")
       .append("circle")
-      .attr("r", 10)
+      .attr("r", 20)
       .attr("class", function(d) {
         for (var i = 0; i < self.electionWinners.length; i++) {
           if (self.electionWinners[i].YEAR == d) {
             break;
           }
         }
-        return  self.chooseClass(self.electionWinners[i].PARTY);
+        return self.chooseClass(self.electionWinners[i].PARTY);
       })
       .on("mouseover", function(d) {
         d3.select(this).classed("highlighted", true);
@@ -105,13 +106,20 @@ class YearChart {
       .on('mouseout', function(d) {
         d3.selectAll("circle").classed("highlighted", false);
       })
-      .on("click",function(d) {
+      .on("click", function(d) {
         d3.selectAll("circle").classed("selected", false);
         d3.select(this).classed("selected", true);
+
+        d3.csv("data/Year_Timeline_" + d + ".csv", function(error, data) {
+          self.electoralVoteChart.update(data, self.colorScale);
+          self.tileChart.update(data, self.colorScale);
+          self.votePercentageChart.update(data, self.colorScale);
+        });
       });
 
     svg.selectAll("text")
-      .attr("transform", "translate(0, 10)");
+      .attr("transform", "translate(0, 20)")
+      .attr("class", "yeartext");
 
 
     // Compute the minimum and maximum date, and the maximum price.
