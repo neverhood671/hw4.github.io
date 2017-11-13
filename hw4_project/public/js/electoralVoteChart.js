@@ -140,12 +140,12 @@ class ElectoralVoteChart {
     var labelArea = this.svg.select("#barArea").append("g");
 
     labelArea.append("text")
-    .text("Electoral Vote (" + parseInt(sumOfVOtes / 2) + " needed to win)")
-    .attr("transform", "translate(" + (self.svgWidth / 2) + "," + 10 + ")")
-    .classed("yeartext", true);
+      .text("Electoral Vote (" + parseInt(sumOfVOtes / 2) + " needed to win)")
+      .attr("transform", "translate(" + (self.svgWidth / 2) + "," + 10 + ")")
+      .classed("yeartext", true);
 
     labelArea.append("text").text(function(d) {
-        return independentVotes == 0 ? "": independentVotes;
+        return independentVotes == 0 ? "" : independentVotes;
       })
       .attr("x", function(d) {
         prev = independentVotes;
@@ -172,7 +172,18 @@ class ElectoralVoteChart {
       .classed("electoralVoteText", true);
 
     labelArea.selectAll(".electoralVoteText").attr("transform", "translate(50, 40)");
-    this.svg.select("#barArea").attr("transform", "translate(0,60)")
+    this.svg.select("#barArea").attr("transform", "translate(0,60)");
+
+    var brush = d3.brushX().extent([
+        [0, 0],
+        [self.svgWidth, 50]
+      ])
+      .on("end", function() {
+        self.brushed();
+      });
+
+    var brushArea = this.svg.select("#barArea").append("g");
+    brushArea.append('g').attr("class", "brush").attr("transform", "translate(50,50)").call(brush);
 
 
     //Display a bar with minimal width in the center of the bar chart to indicate the 50% mark
@@ -192,6 +203,26 @@ class ElectoralVoteChart {
 
 
   };
+
+  brushed() {
+    var s = d3.event.selection,
+      x0 = s[0],
+      x1 = s[1];
+    var selectedStates = [];
+
+    d3.select("#barArea").selectAll("rect").each(function(d, i) {
+      var currectBarX = this.x.baseVal.value;
+      var currectBarWidth = this.width.baseVal.value;
+      var currentBarY = currectBarX + currectBarWidth;
+      if ((s[0] >= currectBarX && s[0] <= currentBarY)
+      || (s[1] >= currectBarX && s[1] <= currentBarY)
+      || (currectBarX > s[0] && currectBarX < s[1])) {
+        selectedStates.push(d3.select(this).data());
+      }
+    });
+
+    this.shiftChart.update(selectedStates);
+  }
 
 
 }

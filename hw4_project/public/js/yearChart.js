@@ -122,6 +122,7 @@ class YearChart {
       .attr("class", "yeartext");
 
 
+
     // Compute the minimum and maximum date, and the maximum price.
 
 
@@ -145,6 +146,7 @@ class YearChart {
 
     //Election information corresponding to that year should be loaded and passed to
     // the update methods of other visualizations
+
 
 
     //******* TODO: EXTRA CREDIT *******
