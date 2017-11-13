@@ -25,22 +25,6 @@ class VotePercentageChart {
 
   }
 
-
-  /**
-   * Returns the class that needs to be assigned to an element.
-   *
-   * @param party an ID for the party that is being referred to.
-   */
-  chooseClass(data) {
-    if (data == "R") {
-      return "republican";
-    } else if (data == "D") {
-      return "democrat";
-    } else if (data == "I") {
-      return "independent";
-    }
-  }
-
   /**
    * Creates the stacked bar chart, text content and tool tips for Vote Percentage chart
    *
