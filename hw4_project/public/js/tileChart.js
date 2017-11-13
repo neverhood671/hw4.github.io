@@ -82,9 +82,9 @@ class TileChart {
     var self = this;
 
     let tip = d3.tip().attr('class', 'd3-tip')
-      .direction('se')
+      .direction('ne')
       .offset(function() {
-        return [0, 0];
+        return [-10, -20];
       })
       .html((d) => {
          var state = {
