@@ -94,16 +94,11 @@ class ElectoralVoteChart {
     //Create the stacked bar chart.
     //Use the global color scale to color code the rectangles.
     //HINT: Use .electoralVotes class to style your bars.
-    this.svg.append("g")
-      .attr("id", "barArea")
-      .append("text")
-      .text("Electoral Vote (" + parseInt(sumOfVOtes / 2) + " needed to win)")
-      .attr("transform", "translate(" + (self.svgWidth / 2) + "," + 30 + ")")
-      .classed("yeartext", true);
+    this.svg.append("g").attr("id", "barArea");
 
     var bar = this.svg.select("#barArea").selectAll("g")
       .data(data)
-      .enter().append("g").classed("bar", true);
+      .enter().append("g");
     var perc_so_far = 0;
 
     bar.append("rect")
@@ -127,39 +122,58 @@ class ElectoralVoteChart {
       })
       .classed("electoralVotes", true);
 
-    this.svg.select("#barArea").append("line")
+    bar.append("line")
       .style("stroke", "black")
       .attr("x1", "50%")
       .attr("y1", 48)
       .attr("x2", "50%")
       .attr("y2", 92)
       .attr("transform", "translate(25,0)");
-
-    var votesLabels = this.svg.select("#barArea").append("g").attr("id", "votesLabels");
-    votesLabels.append("text").text(independentVotes)
-      .attr("transform", function(d) {
-        return "translate(" + (stateGroups["independent"].length > 0 ? 65 : -100) + ", 48)";
-      })
-      .attr("style", "fill: green");
-    votesLabels.append("text").text(democratVotes)
-      .attr("x", function(d) {
-        return (independentVotes / sumOfVOtes * 100) + "%";
-      })
-      .attr("style", "fill: #6baed6")
-      .attr("transform", "translate(68,48)");
-    votesLabels.append("text").text(republicanVotes)
-      .attr("x", function(d) {
-        return (97.5) + "%";
-      })
-      .attr("y", 48)
-      .attr("style", "fill: #de2d26");
-
-    votesLabels.selectAll("text").classed("yeartext", true);
-
     //Display total count of electoral votes won by the Democrat and Republican party
     //on top of the corresponding groups of bars.
     //HINT: Use the .electoralVoteText class to style your text elements;  Use this in combination with
     // chooseClass to get a color based on the party wherever necessary
+
+
+
+    var prev = 0
+    var labelArea = this.svg.select("#barArea").append("g");
+
+    labelArea.append("text")
+    .text("Electoral Vote (" + parseInt(sumOfVOtes / 2) + " needed to win)")
+    .attr("transform", "translate(" + (self.svgWidth / 2) + "," + 10 + ")")
+    .classed("yeartext", true);
+
+    labelArea.append("text").text(function(d) {
+        return independentVotes == 0 ? "": independentVotes;
+      })
+      .attr("x", function(d) {
+        prev = independentVotes;
+        return 0 + "%";
+      })
+      .attr("fill", "green")
+      .classed("electoralVoteText", true);
+
+    labelArea.append("text").text(democratVotes)
+      .attr("x", function(d) {
+        if (prev == 0) {
+          return 0 + "%";
+        }
+        return (democratVotes / sumOfVOtes * 100 - 20) + "%";
+      })
+      .attr("style", "fill: #6baed6")
+      .classed("electoralVoteText", true);
+
+    labelArea.append("text").text(republicanVotes)
+      .attr("x", function(d) {
+        return 89 + "%";
+      })
+      .attr("fill", "#de2d26")
+      .classed("electoralVoteText", true);
+
+    labelArea.selectAll(".electoralVoteText").attr("transform", "translate(50, 40)");
+    this.svg.select("#barArea").attr("transform", "translate(0,60)")
+
 
     //Display a bar with minimal width in the center of the bar chart to indicate the 50% mark
     //HINT: Use .middlePoint class to style this bar.
