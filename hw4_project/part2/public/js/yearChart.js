@@ -109,6 +109,7 @@ class YearChart {
       .on("click", function(d) {
         d3.selectAll("circle").classed("selected", false);
         d3.select(this).classed("selected", true);
+        d3.selectAll(".brushed_state").remove();
 
         d3.csv("data/Year_Timeline_" + d + ".csv", function(error, data) {
           self.electoralVoteChart.update(data, self.colorScale);
