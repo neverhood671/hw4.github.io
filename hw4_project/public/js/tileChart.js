@@ -59,8 +59,12 @@ class TileChart {
     text += "Electoral Votes: " + tooltip_data.electoralVotes;
     text += "<ul>"
     tooltip_data.result.forEach((row) => {
-      //text += "<li>" + row.nominee+":\t\t"+row.votecount+"("+row.percentage+"%)" + "</li>"
-      text += "<li class = " + this.chooseClass(row.party) + ">" + row.nominee + ":\t\t" + row.votecount + "(" + row.percentage + "%)" + "</li>"
+      if (row.percentage == "" || row.percentage == 0){
+        text += ""
+      } else {
+        //text += "<li>" + row.nominee+":\t\t"+row.votecount+"("+row.percentage+"%)" + "</li>"
+        text += "<li class = " + this.chooseClass(row.party) + ">" + row.nominee + ":\t\t" + row.votecount + "(" + row.percentage + "%)" + "</li>"
+      }
     });
     text += "</ul>";
 
@@ -77,42 +81,40 @@ class TileChart {
     d3.select("#tileArea").remove();
     var self = this;
 
-    var data = [];
-    for (var i = 0; i < electionResult.length; i++) {
-      var state = {
-        state: electionResult[i].State,
-        abbreviation: electionResult[i].Abbreviation,
-        winner: electionResult[i].State_Winner,
-        electoralVotes: electionResult[i].Total_EV,
-        nominee: electionResult[i].I_Nominee_prop,
-        row: electionResult[i].Row,
-        column: electionResult[i].Space,
-        RD_Difference: electionResult[i].RD_Difference,
-        result: [{
-            "nominee": electionResult[i].D_Nominee_prop,
-            "votecount": electionResult[i].D_Votes,
-            "percentage": electionResult[i].D_Percentage,
-            "party": "D"
-          },
-          {
-            "nominee": electionResult[i].R_Nominee_prop,
-            "votecount": electionResult[i].R_Votes,
-            "percentage": electionResult[i].R_Percentage,
-            "party": "R"
-          },
-          {
-            "nominee": electionResult[i].I_Nominee_prop,
-            "votecount": electionResult[i].I_Votes,
-            "percentage": electionResult[i].I_Percentage,
-            "party": "I"
-          }
-        ]
-      };
-      data.push(state);
-    }
+    let tip = d3.tip().attr('class', 'd3-tip')
+      .direction('se')
+      .offset(function() {
+        return [0, 0];
+      })
+      .html((d) => {
+         var state = {
+           state: d.State,
+           winner: d.State_Winner,
+           electoralVotes: d.Total_EV,
+           result: [{
+               "nominee": d.D_Nominee_prop,
+               "votecount": d.D_Votes,
+               "percentage":d.D_Percentage,
+               "party": "D"
+             },
+             {
+               "nominee": d.R_Nominee_prop,
+               "votecount": d.R_Votes,
+               "percentage": d.R_Percentage,
+               "party": "R"
+             },
+             {
+               "nominee": d.I_Nominee_prop,
+               "votecount": d.I_Votes,
+               "percentage": d.I_Percentage,
+               "party": "I"
+             }
+           ]
+         }
+        return self.tooltip_render(state);
+      });
 
-
-
+    this.svg.call(tip);
     //Calculates the maximum number of columns to be laid out on the svg
     this.maxColumns = d3.max(electionResult, function(d) {
       return parseInt(d["Space"]);
@@ -127,17 +129,17 @@ class TileChart {
 
     this.svg.append("g").attr("id", "tileArea");
     var tile = this.svg.select("#tileArea").selectAll("g")
-      .data(data)
+      .data(electionResult)
       .enter().append("g");
 
     tile.append("rect")
       .attr("width", w)
       .attr("height", h)
       .attr("x", function(d, i) {
-        return d.column * w;
+        return d.Space * w;
       })
       .attr("y", function(d, i) {
-        return d.row * h;
+        return d.Row * h;
       })
       .attr("fill", function(d) {
         if (d["RD_Difference"] == 0) {
@@ -146,30 +148,32 @@ class TileChart {
           return (colorScale(d["RD_Difference"]));
         }
       })
-      .classed("tile", true);
+      .classed("tile", true)
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide);
 
     tile.append("text")
       .attr("x", function(d, i) {
-        return d.column * w + w / 2;
+        return d.Space * w + w / 2;
       })
       .attr("y", function(d, i) {
-        return d.row * h + h  * 2 /5;
+        return d.Row * h + h  * 2 /5;
       })
       .text(function(d) {
-        return d.abbreviation;
+        return d.Abbreviation;
       })
       .classed("tilestext", true);
 
 
     tile.append("text")
       .attr("x", function(d, i) {
-        return d.column * w + w / 2;
+        return d.Space * w + w / 2;
       })
       .attr("y", function(d, i) {
-        return d.row * h + h * 4 / 5;
+        return d.Row * h + h * 4 / 5;
       })
       .text(function(d) {
-        return d.electoralVotes;
+        return d.Total_EV;
       })
       .classed("tilestext", true);
 
@@ -189,30 +193,7 @@ class TileChart {
 
     //for reference:https://github.com/Caged/d3-tip
     //Use this tool tip element to handle any hover over the chart
-    let tip = d3.tip().attr('class', 'd3-tip')
-      .direction('se')
-      .offset(function() {
-        return [0, 0];
-      })
-      .html((d) => {
-        /* populate data in the following format
-         * tooltip_data = {
-         * "state": State,
-         * "winner":d.State_Winner
-         * "electoralVotes" : Total_EV
-         * "result":[
-         * {"nominee": D_Nominee_prop,"votecount": D_Votes,"percentage": D_Percentage,"party":"D"} ,
-         * {"nominee": R_Nominee_prop,"votecount": R_Votes,"percentage": R_Percentage,"party":"R"} ,
-         * {"nominee": I_Nominee_prop,"votecount": I_Votes,"percentage": I_Percentage,"party":"I"}
-         * ]
-         * }
-         * pass this as an argument to the tooltip_render function then,
-         * return the HTML content returned from that method.
-         * */
 
-
-        return self.tooltip_render(state);
-      });
 
     // ******* TODO: PART IV *******
     //Tansform the legend element to appear in the center and make a call to this element for it to display.

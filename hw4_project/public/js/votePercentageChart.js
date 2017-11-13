@@ -26,6 +26,22 @@ class VotePercentageChart {
   }
 
   /**
+   * Returns the class that needs to be assigned to an element.
+   *
+   * @param party an ID for the party that is being referred to.
+   */
+  chooseClass(party) {
+    if (party == "R") {
+      return "republican";
+    } else if (party == "D") {
+      return "democrat";
+    } else if (party == "I") {
+      return "independent";
+    }
+  }
+
+
+  /**
    * Creates the stacked bar chart, text content and tool tips for Vote Percentage chart
    *
    * @param electionResult election data for the year selected
@@ -35,19 +51,16 @@ class VotePercentageChart {
 
     var data = [{
         votePercent: electionResult[0].I_PopularPercentage.length > 0 ? electionResult[0].I_PopularPercentage.slice(0, -1) : 0,
-        color: "green",
         nominee: electionResult[0].I_Nominee_prop,
         party: "I"
       },
       {
         votePercent: electionResult[0].D_PopularPercentage.length > 0 ? electionResult[0].D_PopularPercentage.slice(0, -1) : 0,
-        color: "#6baed6",
         nominee: electionResult[0].D_Nominee_prop,
         party: "D"
       },
       {
         votePercent: electionResult[0].R_PopularPercentage.length > 0 ? electionResult[0].R_PopularPercentage.slice(0, -1) : 0,
-        color: "#de2d26",
         nominee: electionResult[0].R_Nominee_prop,
         party: "R"
       },
@@ -74,8 +87,8 @@ class VotePercentageChart {
         return prev_perc + "%";
       })
       .attr("transform", " translate(50,100)")
-      .attr("fill", function(d) {
-        return d.color;
+      .attr("class", function(d) {
+        return self.chooseClass(d.party);
       })
       .attr("height", 40)
       .classed("electoralVotes", true)
@@ -103,7 +116,7 @@ class VotePercentageChart {
           }
           return (parseFloat(d.votePercent) + prev) / 2.5 + "%";
         } else {
-          return 86 + "%";
+          return 93 + "%";
         }
       })
       .attr("transform", " translate(50,90)")
@@ -125,16 +138,17 @@ class VotePercentageChart {
           }
           return (parseFloat(d.votePercent) + prev) / 2.5  + "%";
         } else {
-          return 68 + "%";
+          return 93 + "%";
         }
       })
       .attr("transform", " translate(50,60)")
 
       .classed("votesPercentageText", true);
 
-    bar.selectAll(".votesPercentageText").attr("fill", function(d) {
-      return d.color;
-    })
+    bar.selectAll(".votesPercentageText")
+    .attr("class", function(d) {
+      return self.chooseClass(d.party);
+    });
 
 
     this.svg.select("#votePercentageArea").append("g").append("text")
